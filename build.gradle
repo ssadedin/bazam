@@ -1,0 +1,50 @@
+apply plugin: 'groovy'
+
+project.ext {
+    VERSION="0.0.1"
+    STAGE="build/stage/groovy-ngs-utils-$VERSION"
+    GROOVY_VERSION="2.4.10"
+}
+
+repositories {
+    mavenCentral()
+
+    maven {
+      name "gral" 
+      url "http://mvn.erichseifert.de/maven2"
+    }
+
+    maven { url 'https://jitpack.io' }
+}
+
+configurations {
+  compile
+}
+
+dependencies {
+    compile group: 'org.codehaus.groovy', name: 'groovy', version: GROOVY_VERSION
+    compile 'org.codehaus.gpars:gpars:0.12'
+    compile 'com.github.ssadedin:groovy-ngs-utils:1.0.9_rc_1'
+}
+
+// Bundle all dependencies into output library
+jar {
+
+    manifest {
+        attributes 'Main-Class': 'bazam.Bazam'
+    }
+
+    from configurations.compile.collect { 
+        it.isDirectory() ? it : zipTree(it) 
+    }
+
+    exclude "org/bouncycastle/**"
+    exclude "META-INF/groovy*"
+    exclude "META-INF/**/*groovy*"
+    exclude "META-INF/BCKEY*"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.3.1'
+}
+
