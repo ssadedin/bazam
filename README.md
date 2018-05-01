@@ -37,12 +37,12 @@ realignment) that you are trying to do on the data.
 
 ## Getting it
 
-Just clone it and build with Gradle:
+You can clone it and build with zero install this way:
 
 ```
 git clone git@github.com:ssadedin/bazam.git
 cd bazam
-gradle clean jar
+./gradlew clean jar
 ```
 
 ## Running it
