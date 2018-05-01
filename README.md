@@ -70,7 +70,7 @@ java -jar build/libs/bazam.jar -bam  test.bam  > tmp.fastq
 ## Realigning a Genome to a New Reference using BWA
 
 ```
-java -jar build/libs/bazam.jar -bam my.bam \
+java -jar build/libs/bazam.jar -bam my.bam | \
          bwa mem -p ref.fa  - | \
          samtools view -bSu - | \
          samtools sort -o out.bam 
@@ -82,7 +82,7 @@ The `-L` flag works to give you just a region of interest. Note that read pairs 
 by either read are emitted in full: 
 
 ```
-java -jar build/libs/bazam.jar -bam my.bam -L chr1:5000000-6000000 \
+java -jar build/libs/bazam.jar -bam my.bam -L chr1:5000000-6000000 | \
          bwa mem -p ref.fa  - | \
          samtools view -bSu - | \
          samtools sort -o out.bam 
@@ -103,14 +103,22 @@ Get only the reads where the pair spans different chromosomes:
 java -jar build/libs/bazam.jar -f "pair.r1.referenceIndex != pair.r2.referenceIndex" -bam  test.bam > chimeric_reads.fastq
 ```
 
-## Other Options
+## Sharding
 
-For greater performance, you can shard reads using `-s` which will cause only
-every nth out of N reads to be emitted (specified in the form `-s n,N`). For
-example, if you give it `-s 2,4` then the second out of every 4 read pairs will
-selected for output, `-s 3,4` would select the 3rd out of every 4 pairs, etc.
-This allows you to use scatter-gather or map/reduce style concurrency to
-process reads in a distributed manner.
+Sharding means breaking up the data into pieces to process the parts separately.
+By sharding the data you can both increase performance and reduce memory requirments
+for any individual shard (while using more memory overall).
+
+You can shard reads using `-s`: this will cause only every nth out of N reads
+to be emitted (specified in the form `-s n,N`). For example, if you give it `-s
+2,4` then the second out of every 4 read pairs will selected for output, `-s
+3,4` would select the 3rd out of every 4 pairs, etc.  This allows you to use
+scatter-gather or map/reduce style concurrency to process reads in a
+distributed manner. In the case of realignment, you could run 4 instances of 
+BWA in the above example to realign four times as fast, and then merge the 
+BAM files afterwards.
+
+# Other Options
 
 You can supply a BED file to restrict regions that reads are harvested from
 with `-L` (note: both reads of a pair are emitted if either one overlaps the
