@@ -1,11 +1,16 @@
 # Bazam
 
-A tool to extract read pairs from coordinate sorted BAM files.
+A tool to extract paired reads in FASTQ format from coordinate sorted BAM files.
 
 ## What?
 
 If you've tried to use Picard SAMtoFASTQ or `samtools fastq` before and 
 ended up unsatisfied, `bazam` might be what you wanted.
+
+Bazam can also give the reads to you as Picard 
+[SAMRecord](https://samtools.github.io/htsjdk/javadoc/htsjdk/htsjdk/samtools/SAMRecord.html)
+object for implementing of any kind of filtering or other processing you would like
+to do on the reads.
 
 ## Why?
 
