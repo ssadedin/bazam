@@ -113,7 +113,7 @@ class Bazam extends ToolBase {
     }
     
     static void main(args) {
-        cli('Bazam -bam <bam> -L <regions>', args) {
+        cli('bazam -bam <bam> -L <regions>', args) {
             bam 'BAM file to extract read pairs from', args:1, required: true
             pad 'Amount to pad regions by (0)', args:1, required: false
             n 'Concurrency parameter (4)', args:1, required: false
