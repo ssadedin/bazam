@@ -1,39 +1,45 @@
 # Bazam
 
-A read extraction and realignment tool for next generation sequencing data
+A tool to extract read pairs from coordinate sorted BAM files.
+
+## What?
+
+If you've tried to use Picard SAMtoFASTQ or `samtools fastq` before and 
+ended up unsatisfied, `bazam` might be what you wanted.
 
 ## Why?
 
+Getting read pairs out of most aligned sequencing files is hard, at least,
+harder than you would think.
+
 Most sequencing data is stored in coordinate sorted BAM files, because that's
 how most analyses want to use it. However, when reads are paired, seeing both
-reads of the pair at the same time also important for some applications. For
+reads of the pair at the same time is required for some applications. For
 example, if you want to realign the reads to a different genome reference, or
-do other actions such as trimming them based on overlap, etc., then you need
-this.  Doing this when the reads are stored in coordinate order is
-unfortunately not easy. Most approaches involve leaving out some of the
-reads,  require re-sorting the BAM file (requiring substantial time and space) or
-are unacceptable slow. Bazam is a tool that efficiently extracts read pairs from 
-BAM files that are stored in coordinate sorted order. In particular, Bazam
-makes it especially easy to realign reads to a new genome without any need for 
-temporary intermediate files.
+other processing such as trimming them based on overlap, etc., then you need
+this.  However you will find (or at least, I found) there actually aren't any good tools to do this
+simple task (hence Bazam, which is a contraction of "bam to bam", based on one simple
+application, which is re-aligning existing reads to a new genome).
 
 ## Why is this hard?
 
 You might think this problem should be easy. However it's difficult because
-when stored in coordinate order the only efficient way to read the file is 
-in coordinate order. Yet a read's mate may be stored at a significant
-coordinate distance, meaning that to see both a read and it's mate 
-you either need to do an expensive random lookup of each mate
-(too slow), or buffer reads in memory until their mate becomes
-available in the stream (too memory expensive). 
+when reads are stored in coordinate order the only efficient way to read them
+is in that order. Yet a read's mate may be stored at a significant coordinate
+distance, meaning that to see both a read and it's mate you either need to do
+an expensive random lookup of each mate (too slow), or buffer reads in memory
+until their mate becomes available in the stream (too memory expensive).
 
 ## How Does Bazam Solve this?
 
-Bazam doesn't do any magic: it just carefully buffers reads using various different 
-strategies for caching to try and minimise memory use. It is also careful designed
-to run fast so that it's probably faster than any downstream application (such as 
-realignment) that you are trying to do on the data.
-
+Bazam doesn't do any magic: it just carefully buffers reads and uses various
+different strategies for caching to try and minimise memory use. Typically
+realigning a whole genome sample (130G or so of data) could require up to 16G
+of RAM to buffer reads. (Note that you can reduce this requirement by
+"sharding" - see below). Bazam is also carefully designed to run fast
+so that it's _probably_ faster than any downstream application (such as
+realignment) that you are trying to do on the data. If not, again, sharding
+is your answer (see below).
 
 ## Getting it
 
