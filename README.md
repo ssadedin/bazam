@@ -67,6 +67,27 @@ Let's get all the read pairs from a BAM File in interleaved FASTQ format:
 java -jar build/libs/bazam.jar -bam  test.bam  > tmp.fastq
 ```
 
+## Realigning a Genome to a New Reference using BWA
+
+```
+java -jar build/libs/bazam.jar -bam my.bam \
+         bwa mem -p ref.fa  - | \
+         samtools view -bSu - | \
+         samtools sort -o out.bam 
+```
+
+## Over a Specific Region
+
+The `-L` flag works to give you just a region of interest. Note that read pairs with any overlap
+by either read are emitted in full: 
+
+```
+java -jar build/libs/bazam.jar -bam my.bam -L chr1:5000000-6000000 \
+         bwa mem -p ref.fa  - | \
+         samtools view -bSu - | \
+         samtools sort -o out.bam 
+```
+
 ## Using Filtering
 
 You can add a filter to select which reads you want extracted. The filter is a
