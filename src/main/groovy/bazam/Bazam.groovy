@@ -57,6 +57,9 @@ class Bazam extends ToolBase {
         
         out.withWriter { 
             PairScanner scanner = new PairScanner(out, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null)
+            if(opts.dr)
+                scanner.debugRead = opts.dr
+                
             if(opts.s) {
                 if(!opts.s ==~ /[0-9]*,[0-9*]/)
                     throw new IllegalArgumentException("Please provide shard number and total number of shards in form s,N to -s")
@@ -118,6 +121,7 @@ class Bazam extends ToolBase {
             pad 'Amount to pad regions by (0)', args:1, required: false
             n 'Concurrency parameter (4)', args:1, required: false
             s 'Sharding factor: format <n>,<N>: output only reads belonging to shard n of N', args:1, required: false
+            dr 'Specify a read name to debug: processing of the read will be verbosey printed', args:1, required: false
             namepos 'Add original position to the read names', required:false
             'L' 'Regions to include reads (and mates of reads) from', longOpt: 'regions', args:1, required: false
             'f' 'Filter using specified groovy expression', longOpt: 'filter', args:1, required: false
