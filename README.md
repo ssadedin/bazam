@@ -56,6 +56,7 @@ You can clone it and build with zero install this way:
 
 ```
 git clone git@github.com:ssadedin/bazam.git
+git submodule update --init --recursive
 cd bazam
 ./gradlew clean jar
 ```
