@@ -45,9 +45,6 @@ class Bazam extends ToolBase {
 
     @Override
     public void run() {
-        log.info "Extracting read pairs from $opts.bam"
-        bam = new SAM(opts.bam)
-        
         Writer out
         if(opts.o || opts.r1) {
             String fileName = opts.o?:opts.r1
@@ -73,41 +70,47 @@ class Bazam extends ToolBase {
         
         out.withWriter { 
             out2.withWriter { 
-                Regions regionsToProcess = getRegions()
-                PairScanner scanner
-                if(!opts.r2)
-                    scanner = new PairScanner(out, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null)
-                else {
-                    log.info "Outputting pairs to separate files"
-                    scanner = new PairScanner(out, out2, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null)
-                } 
-            
-                if(opts.dr)
-                    scanner.debugRead = opts.dr
-                    
-                if(opts.s) {
-                    if(!opts.s ==~ /[0-9]*,[0-9*]/)
-                        throw new IllegalArgumentException("Please provide shard number and total number of shards in form s,N to -s")
-                        
-                    scanner.shardId = opts.s.tokenize(',')[0].toInteger()-1
-                    if(scanner.shardId<0)
-                        throw new IllegalArgumentException("Please specify shard id > 0")
-                        
-                    scanner.shardSize = opts.s.tokenize(',')[1].toInteger()
-                    if(scanner.shardId >= scanner.shardSize)
-                        throw new IllegalArgumentException("Please specify shard id < number of shards ($scanner.shardSize)")
-                }
-                
-                if(opts.namepos)
-                    scanner.formatter.addPosition = true
-                    
-                scanner.scan(bam)
-                
-                // Debug option: dumps residual unpaired reads at end
-                if(opts.du) {
-                    dumpResidualReads(scanner)
-                }
+                run(opts, out, out2)
             }
+        }
+    }
+
+    public run(OptionAccessor opts, Writer out, Writer out2) {
+        log.info "Extracting read pairs from $opts.bam"
+        bam = new SAM(opts.bam)
+        Regions regionsToProcess = getRegions()
+        PairScanner scanner
+        if(!opts.r2)
+            scanner = new PairScanner(out, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null)
+        else {
+            log.info "Outputting pairs to separate files"
+            scanner = new PairScanner(out, out2, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null)
+        }
+
+        if(opts.dr)
+            scanner.debugRead = opts.dr
+
+        if(opts.s) {
+            if(!opts.s ==~ /[0-9]*,[0-9*]/)
+                throw new IllegalArgumentException("Please provide shard number and total number of shards in form s,N to -s")
+
+            scanner.shardId = opts.s.tokenize(',')[0].toInteger()-1
+            if(scanner.shardId<0)
+                throw new IllegalArgumentException("Please specify shard id > 0")
+
+            scanner.shardSize = opts.s.tokenize(',')[1].toInteger()
+            if(scanner.shardId >= scanner.shardSize)
+                throw new IllegalArgumentException("Please specify shard id < number of shards ($scanner.shardSize)")
+        }
+
+        if(opts.namepos)
+            scanner.formatter.addPosition = true
+
+        scanner.scan(bam)
+
+        // Debug option: dumps residual unpaired reads at end
+        if(opts.du) {
+            dumpResidualReads(scanner)
         }
     }
     
