@@ -24,6 +24,7 @@ import gngs.pair.PairLocator
 import gngs.pair.PairScanner
 import groovy.util.logging.Log
 import groovyx.gpars.actor.DefaultActor
+import java.util.zip.GZIPOutputStream
 
 /**
  * Extracts read pairs from BAM or CRAM files sorted in coordinate order.
@@ -48,61 +49,101 @@ class Bazam extends ToolBase {
         bam = new SAM(opts.bam)
         
         Writer out
-        if(opts.o) {
-            out = new BufferedWriter(new File(opts.o).newWriter(), 2024*1024)
+        if(opts.o || opts.r1) {
+            String fileName = opts.o?:opts.r1
+            if(fileName.endsWith('.gz'))
+                out = new BufferedWriter(new GZIPOutputStream(new FileOutputStream(fileName)).newWriter(), 2024*1024)
+            else
+                out = new BufferedWriter(new File(fileName).newWriter(), 2024*1024)
         }
         else {
             out = System.out.newWriter()
         }
         
+        Writer out2
+        if(opts.r2) {
+            if(opts.r2.endsWith('.gz'))
+                out2 = new BufferedWriter(new GZIPOutputStream(new FileOutputStream(opts.r2)).newWriter(), 2024*1024)
+            else
+                out2 = new BufferedWriter(new File(opts.r2).newWriter(), 2024*1024)
+        }
+        else {
+            out2 = out
+        } 
+        
         out.withWriter { 
-            PairScanner scanner = new PairScanner(out, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null)
-            if(opts.dr)
-                scanner.debugRead = opts.dr
+            out2.withWriter { 
+                Regions regionsToProcess = getRegions()
+                PairScanner scanner
+                if(!opts.r2)
+                    scanner = new PairScanner(out, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null)
+                else {
+                    log.info "Outputting pairs to separate files"
+                    scanner = new PairScanner(out, out2, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null)
+                } 
+            
+                if(opts.dr)
+                    scanner.debugRead = opts.dr
+                    
+                if(opts.s) {
+                    if(!opts.s ==~ /[0-9]*,[0-9*]/)
+                        throw new IllegalArgumentException("Please provide shard number and total number of shards in form s,N to -s")
+                        
+                    scanner.shardId = opts.s.tokenize(',')[0].toInteger()-1
+                    if(scanner.shardId<0)
+                        throw new IllegalArgumentException("Please specify shard id > 0")
+                        
+                    scanner.shardSize = opts.s.tokenize(',')[1].toInteger()
+                    if(scanner.shardId >= scanner.shardSize)
+                        throw new IllegalArgumentException("Please specify shard id < number of shards ($scanner.shardSize)")
+                }
                 
-            if(opts.s) {
-                if(!opts.s ==~ /[0-9]*,[0-9*]/)
-                    throw new IllegalArgumentException("Please provide shard number and total number of shards in form s,N to -s")
+                if(opts.namepos)
+                    scanner.formatter.addPosition = true
                     
-                scanner.shardId = opts.s.tokenize(',')[0].toInteger()-1
-                if(scanner.shardId<0)
-                    throw new IllegalArgumentException("Please specify shard id > 0")
-                    
-                scanner.shardSize = opts.s.tokenize(',')[1].toInteger()
-                if(scanner.shardId >= scanner.shardSize)
-                    throw new IllegalArgumentException("Please specify shard id < number of shards ($scanner.shardSize)")
+                scanner.scan(bam)
+                
+                // Debug option: dumps residual unpaired reads at end
+                if(opts.du) {
+                    dumpResidualReads(scanner)
+                }
             }
-            
-            if(opts.namepos)
-                scanner.formatter.addPosition = true
-                
-            scanner.scan(bam)
-            
-            // Debug option: dumps residual unpaired reads at end
-            if(opts.du) {
-                scanner.locators.each { PairLocator locator ->
-                    if(!locator.buffer.isEmpty()) {
-                        log.info "ERROR: Residual reads in locator: "
-                        locator.buffer.each { key, value ->
-                            log.info "$key: $value.r1ReferenceName:$value.r1AlignmentStart"
-                        }
-                    }
+        }
+    }
+    
+    void dumpResidualReads(PairScanner scanner) {
+        scanner.locators.each { PairLocator locator ->
+            if(!locator.buffer.isEmpty()) {
+                log.info "ERROR: Residual reads in locator: "
+                locator.buffer.each { key, value ->
+                    log.info "$key: $value.r1ReferenceName:$value.r1AlignmentStart"
                 }
             }
         }
     }
     
     Regions getRegions() {
+        
         log.info "Initialising regions to scan from $opts.L"
         Regions regions
-        if(opts.L.endsWith('.bed')) {
-            regions = new BED(opts.L).load()
+        if(opts.L) {
+            if(opts.L.endsWith('.bed')) {
+                regions = new BED(opts.L).load()
+            }
+            else {
+                regions = new Regions()
+                regions.addRegion(new Region(opts.L))
+            }
         }
-        else {
+        else
+        if(opts.gene) {
+            RefGenes refGenes = RefGenes.download(new SAM(opts.bam).sniffGenomeBuild())
             regions = new Regions()
-            regions.addRegion(new Region(opts.L))
+            regions.addRegion(refGenes.getGeneRegion(opts.gene))
         }
-        
+        else 
+            return null
+            
         log.info "There are ${Utils.humanBp(regions.size())} included regions"
         
         if(opts.pad) {
@@ -126,6 +167,9 @@ class Bazam extends ToolBase {
             'L' 'Regions to include reads (and mates of reads) from', longOpt: 'regions', args:1, required: false
             'f' 'Filter using specified groovy expression', longOpt: 'filter', args:1, required: false
             o 'Output file', args:1, required: false
+            r1 'Output for R1 if extracting FASTQ in separate files', args:1, required: false
+            r2 'Output for R2 if extracting FASTQ in separate files', args:1, required: false
+            gene 'Extract region of given gene', args:1, required: false
         }
     }
 }
