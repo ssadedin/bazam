@@ -1,0 +1,2 @@
+rootProject.name = 'bazam'
+include('groovy-ngs-utils','groovy-ngs-utils:htsjdk','groovy-ngs-utils:graxxia')
