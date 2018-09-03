@@ -10,7 +10,7 @@ FASTQ in a form that can stream directly into common aligners such as
 BWA or Bowtie2, so that you can quickly and easily realign reads without
 extraction to any intermediate format.
 
-![Bazam workflow for realignment](docs/bazam_flow_diagram.svg?raw=true "Bazam Realignment")
+![Bazam workflow for realignment](docs/bazam_flow_diagram.png?raw=true "Bazam Realignment")
 
 If you want to write code in Java, Groovy, Kotlin or any other JVM language
 that uses paired reads, Bazam can also give the reads
