@@ -4,19 +4,21 @@ A tool to extract paired reads in FASTQ format from coordinate sorted BAM files.
 
 ## What?
 
-If you've tried to use Picard SAMtoFASTQ or `samtools fastq` before and 
-ended up unsatisfied, `bazam` might be what you wanted. Bazam will output
+Bazam is a smarter way to realign reads from one genome to another. If you've tried to use 
+Picard SAMtoFASTQ or `samtools bam2fq` before and 
+ended up unsatisfied with complicated, long running inefficient pipelines, `bazam` might 
+be what you wanted. Bazam will output
 FASTQ in a form that can stream directly into common aligners such as
 BWA or Bowtie2, so that you can quickly and easily realign reads without
-extraction to any intermediate format.
+extraction to any intermediate format. Bazam can target a specific region of the genome, 
+specified as a region or a gene name if you prefer.
 
 ![Bazam workflow for realignment](docs/bazam_flow_diagram.png?raw=true "Bazam Realignment")
 
-If you want to write code in Java, Groovy, Kotlin or any other JVM language
-that uses paired reads, Bazam can also give the reads
-to you as Picard [SAMRecord](https://samtools.github.io/htsjdk/javadoc/htsjdk/htsjdk/samtools/SAMRecord.html)
-object for implementing of any kind of filtering or other processing you would
-like to do on the reads.
+If you are writing a tool that works on BAM files then you might be interested in tapping into
+Bazam as a library: Bazam can give the reads pairs to you directly
+as Picard [SAMRecord](https://samtools.github.io/htsjdk/javadoc/htsjdk/htsjdk/samtools/SAMRecord.html)
+objects.
 
 ## Why?
 
@@ -24,9 +26,9 @@ Getting read pairs out of most aligned sequencing files is hard, at least,
 harder than you would think.
 
 Most sequencing data is stored in coordinate sorted BAM files, because that's
-how most analyses want to use it. However, when reads are paired, seeing both
-reads of the pair at the same time is required for some applications. For
-example, if you want to realign the reads to a different genome reference, or
+how most analyses want to use it. But if you want to get back the original read pairs for some
+other reason it is awkward from this format. For example,
+if you want to realign the reads to a different genome reference, or do
 other processing such as trimming them based on overlap, etc., then you need
 this.  However you will find (or at least, I found) there actually aren't any good tools to do this
 simple task (hence Bazam, which is a contraction of "bam to bam", based on one simple
