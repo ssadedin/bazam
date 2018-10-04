@@ -147,6 +147,5 @@ example, comparing two aligners, etc).
 
 You can see an advanced example of Bazam being used in the STRetch pipeline:
 
-https://github.com/Oshlack/STRetch/blob/master/pipelines/pipeline_stages.groovy
-
+https://github.com/Oshlack/STRetch/blob/master/pipelines/pipeline_stages.groovy#L121
 
