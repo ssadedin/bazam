@@ -76,6 +76,9 @@ class Bazam extends ToolBase {
     }
 
     public run(OptionAccessor opts, Writer out, Writer out2) {
+        
+        
+        
         log.info "Extracting read pairs from $opts.bam"
         bam = new SAM(opts.bam)
         Regions regionsToProcess = getRegions()
@@ -160,11 +163,16 @@ class Bazam extends ToolBase {
     }
     
     static void main(args) {
-        cli('java -jar bazam.jar -bam <bam> -L <regions>', args) {
+        
+        Cli cli = new Cli(usage: 'java -jar bazam.jar <options>')
+        cli.h 'Show help', longOpt: 'help' 
+        
+        Closure buildOptions = {
             bam 'BAM file to extract read pairs from', args:1, required: true
             pad 'Amount to pad regions by (0)', args:1, required: false
             n 'Concurrency parameter (4)', args:1, required: false
             s 'Sharding factor: format <n>,<N>: output only reads belonging to shard n of N', args:1, required: false
+            h 'Show this help message', longOpt: 'help', required: false
             dr 'Specify a read name to debug: processing of the read will be verbosey printed', args:1, required: false
             namepos 'Add original position to the read names', required:false
             'L' 'Regions to include reads (and mates of reads) from', longOpt: 'regions', args:1, required: false
@@ -174,5 +182,23 @@ class Bazam extends ToolBase {
             r2 'Output for R2 if extracting FASTQ in separate files', args:1, required: false
             gene 'Extract region of given gene', args:1, required: false
         }
+  
+        // As a workaround until the base framework is updated to properly support Help,
+        // we parse the options separately without the main options applied, and
+        // manually show the help if -h is passed
+        OptionAccessor helpOpts = cli.parse(args)
+        if(helpOpts && helpOpts.h) {
+            def err = System.err
+            err.println("=" * 80)
+            err.println "\nBazam\n"
+            err.println("=" * 80)
+            err.println ""
+  
+            cli.with(buildOptions)
+            cli.usage()
+            System.exit(0)
+        }
+        
+        cli('java -jar bazam.jar -bam <bam> -L <regions>', args, buildOptions) 
     }
 }
