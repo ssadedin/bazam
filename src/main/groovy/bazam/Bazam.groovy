@@ -164,8 +164,8 @@ class Bazam extends ToolBase {
     
     static void main(args) {
         
-        Cli cli = new Cli(usage: 'java -jar bazam.jar <options>')
-        cli.h 'Show help', longOpt: 'help' 
+        Cli helpCli = new Cli(usage: 'java -jar bazam.jar <options>')
+        helpCli.h 'Show help', longOpt: 'help' 
         
         Closure buildOptions = {
             bam 'BAM file to extract read pairs from', args:1, required: true
@@ -186,7 +186,7 @@ class Bazam extends ToolBase {
         // As a workaround until the base framework is updated to properly support Help,
         // we parse the options separately without the main options applied, and
         // manually show the help if -h is passed
-        OptionAccessor helpOpts = cli.parse(args)
+        OptionAccessor helpOpts = helpCli.parse(args)
         if(helpOpts && helpOpts.h) {
             def err = System.err
             err.println("=" * 80)
@@ -194,8 +194,8 @@ class Bazam extends ToolBase {
             err.println("=" * 80)
             err.println ""
   
-            cli.with(buildOptions)
-            cli.usage()
+            helpCli.with(buildOptions)
+            helpCli.usage()
             System.exit(0)
         }
         
