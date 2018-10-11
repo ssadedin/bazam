@@ -31,7 +31,7 @@ dependencies {
 jar {
 
     manifest {
-        attributes 'Main-Class': 'bazam.Bazam'
+        attributes 'Main-Class': 'bazam.Bazam9'
     }
 
     from configurations.compile.collect { 
