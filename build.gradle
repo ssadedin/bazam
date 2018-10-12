@@ -1,10 +1,11 @@
 apply plugin: 'groovy'
 
 project.ext {
-    VERSION="0.0.1"
-    STAGE="build/stage/groovy-ngs-utils-$VERSION"
+    VERSION="git-" + "git describe --always".execute().text
     GROOVY_VERSION="2.4.10"
 }
+
+new File('build/classes/bazam.properties').text = "version=$VERSION\n"
 
 repositories {
     mavenCentral()
@@ -38,10 +39,25 @@ jar {
         it.isDirectory() ? it : zipTree(it) 
     }
 
+    from("build/classes") {
+        include "bazam.properties"
+    }
+
     exclude "org/bouncycastle/**"
     exclude "META-INF/groovy*"
     exclude "META-INF/**/*groovy*"
     exclude "META-INF/BCKEY*"
+}
+
+test {
+    testLogging {
+        exceptionFormat = 'full'
+        showStandardStreams = true
+    }
+    
+    beforeTest {
+        println ">>>>>>>>> Test: $it.name"
+    }
 }
 
 task wrapper(type: Wrapper) {

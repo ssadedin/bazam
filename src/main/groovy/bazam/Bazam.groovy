@@ -77,8 +77,6 @@ class Bazam extends ToolBase {
 
     public run(OptionAccessor opts, Writer out, Writer out2) {
         
-        
-        
         log.info "Extracting read pairs from $opts.bam"
         bam = new SAM(opts.bam)
         Regions regionsToProcess = getRegions()
@@ -164,10 +162,10 @@ class Bazam extends ToolBase {
     
     static void main(args) {
         
-        Cli helpCli = new Cli(usage: 'java -jar bazam.jar <options>')
-        helpCli.h 'Show help', longOpt: 'help' 
         
         Closure buildOptions = {
+            h 'Show help', longOpt: 'help' 
+            v 'Print the version of Bazam', longOpt: 'version', required: false
             bam 'BAM file to extract read pairs from', args:1, required: true
             pad 'Amount to pad regions by (0)', args:1, required: false
             n 'Concurrency parameter (4)', args:1, required: false
@@ -182,23 +180,37 @@ class Bazam extends ToolBase {
             r2 'Output for R2 if extracting FASTQ in separate files', args:1, required: false
             gene 'Extract region of given gene', args:1, required: false
         }
-  
+        
         // As a workaround until the base framework is updated to properly support Help,
         // we parse the options separately without the main options applied, and
         // manually show the help if -h is passed
-        OptionAccessor helpOpts = helpCli.parse(args)
-        if(helpOpts && helpOpts.h) {
+        if("-h" in args || "--help" in args) {
             def err = System.err
             err.println("=" * 80)
             err.println "\nBazam\n"
             err.println("=" * 80)
             err.println ""
   
+            Cli helpCli = new Cli(usage: 'java -jar bazam.jar <options>')
             helpCli.with(buildOptions)
             helpCli.usage()
             System.exit(0)
         }
         
+        if("-v" in args || "--version" in args) {
+            String version = readVersion()
+            println "Bazam $version"
+            System.exit(0)
+        }
+        
         cli('java -jar bazam.jar -bam <bam> -L <regions>', args, buildOptions) 
+    }
+    
+    static String readVersion() {
+        Properties bazamProps = new Properties()
+        Bazam.class.getClassLoader().getResourceAsStream('bazam.properties')?.withStream { s ->
+            bazamProps.load(s)
+        }
+        return bazamProps.version?:"Unknown Version"
     }
 }
