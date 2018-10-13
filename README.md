@@ -1,4 +1,4 @@
-# Bazam
+# Bazam [![Build Status](https://travis-ci.com/ssadedin/bazam.svg?branch=master)](https://travis-ci.com/ssadedin/bazam)
 
 A tool to extract paired reads in FASTQ format from coordinate sorted BAM files.
 
