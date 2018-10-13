@@ -132,6 +132,20 @@ distributed manner. In the case of realignment, you could run 4 instances of
 BWA in the above example to realign four times as fast, and then merge the 
 BAM files afterwards.
 
+## CRAM Support
+
+CRAM is a reference based compression method, so if your input files are CRAM
+then you need to specify the reference to decode from. Bazam uses HTSJDK for
+CRAM support, so you can inform it about how to locate the reference using the
+standard properties that HTSJDK supports. The most simple way is to directly
+specify it using the samjdk.reference_fasta property, eg:
+
+```bash
+java  -Xmx12g -Dsamjdk.reference_fasta=/reference/hg38/Homo_sapiens_assembly38.fasta \
+      -jar build/libs/bazam.jar test.cram > test.fastq.gz
+```
+
+
 # Other Options
 
 You can supply a BED file to restrict regions that reads are harvested from
