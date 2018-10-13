@@ -1,0 +1,22 @@
+os:
+- linux
+
+sudo: required
+dist: trusty
+
+languages: java
+
+cache:
+- apt
+
+before_install:
+- sudo apt-get -qq update -y
+
+script:
+- ./gradlew jar
+- ./gradlew :test
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always
