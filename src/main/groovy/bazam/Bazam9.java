@@ -14,6 +14,13 @@ public class Bazam9 {
      */
     public static void main(String [] args) {
         disableWarning();
+        
+        // Needed to initialize the snappy library, if that is used to compress reads in memory
+        System.setProperty("org.xerial.snappy.lib.name", "libsnappyjava.jnilib");
+        
+        // Set HTSJDK buffer size
+        System.setProperty("samjdk.buffer_size","2048000");
+        
         Bazam.main(args);
     }
     

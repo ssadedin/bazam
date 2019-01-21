@@ -24,6 +24,7 @@ import gngs.pair.PairLocator
 import gngs.pair.PairScanner
 import groovy.util.logging.Log
 import groovyx.gpars.actor.DefaultActor
+
 import java.util.zip.GZIPOutputStream
 
 /**
@@ -45,24 +46,26 @@ class Bazam extends ToolBase {
 
     @Override
     public void run() {
+        int bufferSize = 1024*1024
         Writer out
         if(opts.o || opts.r1) {
             String fileName = opts.o?:opts.r1
             if(fileName.endsWith('.gz'))
-                out = new BufferedWriter(new GZIPOutputStream(new FileOutputStream(fileName)).newWriter(), 2024*1024)
+                out = new AsciiWriter(new GZIPOutputStream(new FileOutputStream(fileName)), bufferSize)
             else
-                out = new BufferedWriter(new File(fileName).newWriter(), 2024*1024)
+                out = new AsciiWriter(new FileOutputStream(fileName), bufferSize)
         }
         else {
-            out = System.out.newWriter()
+            out = new AsciiWriter(System.out, bufferSize)
         }
         
         Writer out2
         if(opts.r2) {
+            out2 = Utils.outputWriter(opts.r2)
             if(opts.r2.endsWith('.gz'))
-                out2 = new BufferedWriter(new GZIPOutputStream(new FileOutputStream(opts.r2)).newWriter(), 2024*1024)
+                out2 = new AsciiWriter(new GZIPOutputStream(new FileOutputStream(opts.r2)), bufferSize)
             else
-                out2 = new BufferedWriter(new File(opts.r2).newWriter(), 2024*1024)
+                out2 = new AsciiWriter(new FileOutputStream(opts.r2), bufferSize)
         }
         else {
             out2 = out
@@ -109,6 +112,8 @@ class Bazam extends ToolBase {
 
         scanner.scan(bam)
 
+//        log.info "Memory statistics: " + CompactReadPair.memoryStats
+        
         // Debug option: dumps residual unpaired reads at end
         if(opts.du) {
             dumpResidualReads(scanner)
@@ -202,6 +207,11 @@ class Bazam extends ToolBase {
             println "Bazam $version"
             System.exit(0)
         }
+        
+        // Needed to initialize the snappy library, if that is used to compress reads in memory
+        System.setProperty("org.xerial.snappy.lib.name", "libsnappyjava.jnilib")
+        
+        System.setProperty("samjdk.buffer_size","2048000")
         
         cli('java -jar bazam.jar -bam <bam> -L <regions>', args, buildOptions) 
     }
