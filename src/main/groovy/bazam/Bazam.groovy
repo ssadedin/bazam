@@ -171,7 +171,7 @@ class Bazam extends ToolBase {
             n 'Concurrency parameter (4)', args:1, required: false
             s 'Sharding factor: format <n>,<N>: output only reads belonging to shard n of N', args:1, required: false
             h 'Show this help message', longOpt: 'help', required: false
-            dr 'Specify a read name to debug: processing of the read will be verbosey printed', args:1, required: false
+            dr 'Specify a read name to debug: processing of the read will be verbosely printed', args:1, required: false
             namepos 'Add original position to the read names', required:false
             'L' 'Regions to include reads (and mates of reads) from', longOpt: 'regions', args:1, required: false
             'f' 'Filter using specified groovy expression', longOpt: 'filter', args:1, required: false
