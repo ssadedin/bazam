@@ -143,9 +143,9 @@ class Bazam extends ToolBase {
     
     Regions getRegions() {
         
-        log.info "Initialising regions to scan from $opts.L"
         Regions regions
         if(opts.L) {
+            log.info "Initialising regions to scan from $opts.L"
             if(opts.L.endsWith('.bed')) {
                 regions = new BED(opts.L).load()
             }
@@ -156,6 +156,7 @@ class Bazam extends ToolBase {
         }
         else
         if(opts.gene) {
+            log.info "Scanning region based on gene: $opts.gene"
             RefGenes refGenes = RefGenes.download(new SAM(opts.bam).sniffGenomeBuild())
             regions = new Regions()
             regions.addRegion(refGenes.getGeneRegion(opts.gene))
