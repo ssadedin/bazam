@@ -81,6 +81,16 @@ class Bazam extends ToolBase {
     public run(OptionAccessor opts, Writer out, Writer out2) {
         
         log.info "Extracting read pairs from $opts.bam"
+        
+        long availableMemory = Runtime.runtime.totalMemory()
+        
+        log.info "Total memory: " + Utils.human(availableMemory).toUpperCase()
+        
+        // Size the output writers so that they use no more than half the available memory
+        int writerQueueSize = availableMemory / PairScanner.FORMATTER_BUFFER_SIZE / 2
+        
+        log.info "Limiting writer queue size to $writerQueueSize to fit into available memory"
+        
         bam = new SAM(opts.bam)
         Regions regionsToProcess = getRegions()
         PairScanner scanner
@@ -108,7 +118,7 @@ class Bazam extends ToolBase {
         }
 
         if(opts.namepos)
-            scanner.formatter.addPosition = true
+            scanner.formatters*.addPosition = true
 
         scanner.scan(bam)
 
