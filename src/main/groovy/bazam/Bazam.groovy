@@ -219,7 +219,11 @@ class Bazam extends ToolBase {
         }
         
         // Needed to initialize the snappy library, if that is used to compress reads in memory
-        System.setProperty("org.xerial.snappy.lib.name", "libsnappyjava.jnilib")
+        // I'm not sure why I had to set this
+        if(System.properties['os.name'].startsWith('Mac')) {
+            log.info "Configuring snappy for OSX ..."
+            System.setProperty("org.xerial.snappy.lib.name", "libsnappyjava.jnilib")
+        }
         
         System.setProperty("samjdk.buffer_size","2048000")
         
