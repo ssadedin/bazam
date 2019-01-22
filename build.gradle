@@ -5,6 +5,7 @@ project.ext {
     GROOVY_VERSION="2.4.10"
 }
 
+new File('build/classes').mkdirs()
 new File('build/classes/bazam.properties').text = "version=$VERSION\n"
 
 repositories {
