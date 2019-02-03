@@ -82,7 +82,7 @@ class Bazam extends ToolBase {
         
         log.info "Extracting read pairs from $opts.bam"
         
-        long availableMemory = Runtime.runtime.totalMemory()
+        long availableMemory = Runtime.runtime.maxMemory()
         
         log.info "Total memory: " + Utils.human(availableMemory).toUpperCase()
         
