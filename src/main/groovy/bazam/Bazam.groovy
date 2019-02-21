@@ -46,38 +46,36 @@ class Bazam extends ToolBase {
 
     @Override
     public void run() {
-        int bufferSize = 1024*1024
         Writer out
         if(opts.o || opts.r1) {
             String fileName = opts.o?:opts.r1
             if(fileName.endsWith('.gz'))
-                out = new AsciiWriter(new GZIPOutputStream(new FileOutputStream(fileName)), bufferSize)
+                out = new BufferedWriter(new GZIPOutputStream(new FileOutputStream(fileName)).newWriter(), 2024*1024)
             else
-                out = new AsciiWriter(new FileOutputStream(fileName), bufferSize)
+                out = new BufferedWriter(new File(fileName).newWriter(), 2024*1024)
         }
         else {
-            out = new AsciiWriter(System.out, bufferSize)
+            out = System.out.newWriter()
         }
-        
+
         Writer out2
         if(opts.r2) {
-            out2 = Utils.outputWriter(opts.r2)
             if(opts.r2.endsWith('.gz'))
-                out2 = new AsciiWriter(new GZIPOutputStream(new FileOutputStream(opts.r2)), bufferSize)
+                out2 = new BufferedWriter(new GZIPOutputStream(new FileOutputStream(opts.r2)).newWriter(), 2024*1024)
             else
-                out2 = new AsciiWriter(new FileOutputStream(opts.r2), bufferSize)
+                out2 = new BufferedWriter(new File(opts.r2).newWriter(), 2024*1024)
         }
         else {
             out2 = out
-        } 
-        
-        out.withWriter { 
-            out2.withWriter { 
+        }
+
+        out.withWriter {
+            out2.withWriter {
                 run(opts, out, out2)
             }
         }
     }
-
+    
     public run(OptionAccessor opts, Writer out, Writer out2) {
         
         log.info "Extracting read pairs from $opts.bam"
@@ -95,10 +93,10 @@ class Bazam extends ToolBase {
         Regions regionsToProcess = getRegions()
         PairScanner scanner
         if(!opts.r2)
-            scanner = new PairScanner(out, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null)
+            scanner = new PairScanner(out, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null, writerQueueSize)
         else {
             log.info "Outputting pairs to separate files"
-            scanner = new PairScanner(out, out2, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null)
+            scanner = new PairScanner(out, out2, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null, writerQueueSize)
         }
 
         if(opts.dr)
@@ -116,6 +114,11 @@ class Bazam extends ToolBase {
             if(scanner.shardId >= scanner.shardSize)
                 throw new IllegalArgumentException("Please specify shard id < number of shards ($scanner.shardSize)")
         }
+        
+        if(opts.sb) {
+            log.info "Setting output shuffle buffer size to ${opts.sb}"
+            scanner.shuffleBufferSize = opts.sb.toInteger()
+        }
 
         if(opts.namepos)
             scanner.formatters*.addPosition = true
@@ -128,6 +131,15 @@ class Bazam extends ToolBase {
         if(opts.du) {
             dumpResidualReads(scanner)
         }
+        
+        if(opts.memstats) {
+            Utils.withWriters([opts.memstats]) { Writer w ->
+                CompactReadPair.baseCompressionStats.save(w)
+                w.write('-\n')
+                CompactReadPair.qualCompressionStats.save(w)
+            }
+        }
+        
     }
     
     void dumpResidualReads(PairScanner scanner) {
@@ -186,11 +198,13 @@ class Bazam extends ToolBase {
             pad 'Amount to pad regions by (0)', args:1, required: false
             n 'Concurrency parameter (4)', args:1, required: false
             s 'Sharding factor: format <n>,<N>: output only reads belonging to shard n of N', args:1, required: false
+            sb 'Output shuffling buffer size for randomizing read order', args:1, required: false
             h 'Show this help message', longOpt: 'help', required: false
             dr 'Specify a read name to debug: processing of the read will be verbosely printed', args:1, required: false
             namepos 'Add original position to the read names', required:false
             'L' 'Regions to include reads (and mates of reads) from', longOpt: 'regions', args:1, required: false
             'f' 'Filter using specified groovy expression', longOpt: 'filter', args:1, required: false
+            memstats 'Save memory compression stats in file', args:1, required: false
             o 'Output file', args:1, required: false
             r1 'Output for R1 if extracting FASTQ in separate files', args:1, required: false
             r2 'Output for R2 if extracting FASTQ in separate files', args:1, required: false
