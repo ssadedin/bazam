@@ -87,7 +87,7 @@ class Bazam extends ToolBase {
         log.info "Total memory: " + Utils.human(availableMemory).toUpperCase()
         
         // Size the output writers so that they use no more than half the available memory
-        int writerQueueSize = availableMemory / PairScanner.FORMATTER_BUFFER_SIZE / 2
+        int writerQueueSize = 50 // Math.min(1000, (int)(availableMemory / PairScanner.FORMATTER_BUFFER_SIZE / 4))
         
         log.info "Limiting writer queue size to $writerQueueSize to fit into available memory"
         
