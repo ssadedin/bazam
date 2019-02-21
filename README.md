@@ -69,7 +69,7 @@ $ java -jar bazam.jar  --help
 
 ### Install from Brew (MacOSX)
 
-Thanks to @tseemann for creating a brew recipe:
+Thanks to [https://twitter.com/torstenseemann?lang=en](@tseemann) for creating a brew recipe:
 
 ```
 brew install brewsci/bio/bazam
