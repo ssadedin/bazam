@@ -54,9 +54,38 @@ so that it's _probably_ faster than any downstream application (such as
 realignment) that you are trying to do on the data. If not, again, sharding
 is your answer (see below).
 
-## Getting it
+## Installation
 
-You can clone it and build with zero install this way:
+There are several very easy ways to get Bazam. 
+
+### Download a Release from Github
+
+Bazam is released as an executable JAR file that you can run directly with java:
+
+```bash
+$ wget 'https://github.com/ssadedin/bazam/releases/download/1.0.1/bazam.jar'
+$ java -jar bazam.jar  --help
+```
+
+### Install from Brew (MacOSX)
+
+Thanks to @tseemann for creating a brew recipe:
+
+```
+brew install brewsci/bio/bazam
+```
+
+### Install via Conda
+
+Thanks again to @tseemann for creating a conda installation:
+
+```
+conda install -c bioconda bazam
+```
+
+### Building from Source
+
+You can clone Bazam source code and build it easily this way:
 
 ```
 git clone git@github.com:ssadedin/bazam.git
@@ -67,11 +96,13 @@ git submodule update --init --recursive
 
 ## Running it
 
-To get the help, you just execute the JAR file:
+To run Bazam from the jar file, just execute it using `java`:
 
 ```
 java -jar build/libs/bazam.jar
 ```
+
+See below for various examples of using Bazam.
 
 ## Simple Example
 
