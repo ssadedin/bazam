@@ -5,6 +5,10 @@ import org.junit.Test
 import gngs.*
 
 class CompressTest {
+    static {
+       // Needed to initialize the snappy library, if that is used to compress reads in memory
+       System.setProperty("org.xerial.snappy.lib.name", "libsnappyjava.jnilib");
+    }
 
     @Test
     public void test() {
