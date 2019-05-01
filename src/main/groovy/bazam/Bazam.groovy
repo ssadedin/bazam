@@ -122,6 +122,9 @@ class Bazam extends ToolBase {
 
         if(opts.namepos)
             scanner.formatters*.addPosition = true
+            
+        if(opts.bqtag) 
+            scanner.baseQualityTag = opts.bqtag
 
         scanner.scan(bam)
 
@@ -190,7 +193,6 @@ class Bazam extends ToolBase {
     
     static void main(args) {
         
-        
         Closure buildOptions = {
             h 'Show help', longOpt: 'help' 
             v 'Print the version of Bazam', longOpt: 'version', required: false
@@ -208,6 +210,7 @@ class Bazam extends ToolBase {
             o 'Output file', args:1, required: false
             r1 'Output for R1 if extracting FASTQ in separate files', args:1, required: false
             r2 'Output for R2 if extracting FASTQ in separate files', args:1, required: false
+            bqtag 'Output base qualities extracted from read tag <arg> (eg: OQ for gatk)', args:1, required: false
             gene 'Extract region of given gene', args:1, required: false
         }
         
