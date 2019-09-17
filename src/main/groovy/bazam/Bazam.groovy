@@ -97,6 +97,9 @@ class Bazam extends ToolBase {
         else {
             log.info "Outputting pairs to separate files"
             scanner = new PairScanner(out, out2, opts.n ? opts.n.toInteger():4, opts.L?getRegions():null, opts.f?:null, writerQueueSize)
+            
+            // Due to a bug / race condition we can only have 1 formatter until this is fixed
+            scanner.numFormatters = 1
         }
 
         if(opts.dr)
