@@ -76,7 +76,7 @@ class Bazam extends ToolBase {
         }
     }
     
-    public run(OptionAccessor opts, Writer out, Writer out2) {
+    public run(CliOptions opts, Writer out, Writer out2) {
         
         log.info "Extracting read pairs from $opts.bam"
         
@@ -169,7 +169,7 @@ class Bazam extends ToolBase {
             }
             else {
                 regions = new Regions()
-                regions.addRegion(new Region(opts.L))
+                regions.addRegion(new Region(opts.L)) // TODO: fix to use proper coordinate range by extracting from BAM file
             }
         }
         else
