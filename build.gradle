@@ -37,7 +37,7 @@ jar {
     }
 
     from configurations.compile.collect { 
-        it.isDirectory() ? it : zipTree(it) 
+        (it.isDirectory() || it.name.endsWith('pom')) ? it : zipTree(it) 
     }
 
     from("build/classes") {
