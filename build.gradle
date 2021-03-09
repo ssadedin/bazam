@@ -2,7 +2,7 @@ apply plugin: 'groovy'
 
 project.ext {
     VERSION="git-" + "git describe --always".execute().text
-    GROOVY_VERSION="2.4.10"
+    GROOVY_VERSION="2.5.13"
 }
 
 new File('build/classes').mkdirs()
