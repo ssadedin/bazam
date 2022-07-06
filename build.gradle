@@ -6,14 +6,13 @@ project.ext {
 }
 
 new File('build/classes').mkdirs()
-new File('build/classes/bazam.properties').text = "version=$VERSION\n"
 
 repositories {
     mavenCentral()
 
     maven {
-      name "gral" 
-      url "http://mvn.erichseifert.de/maven2"
+      name "ImageJ"
+      url "http://maven.imagej.net/content/repositories/public/"
     }
 
     maven { url 'https://jitpack.io' }
