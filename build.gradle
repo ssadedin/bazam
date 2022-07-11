@@ -25,6 +25,13 @@ configurations {
 dependencies {
     compile group: 'org.codehaus.groovy', name: 'groovy', version: GROOVY_VERSION
     compile 'org.codehaus.gpars:gpars:0.12'
+    
+    if(enable_gcloud=='true') {
+        println "\n========== Enabling Google-Cloud Support ============\n"
+        compile platform('com.google.cloud:libraries-bom:23.0.0')
+        compile 'com.google.cloud:google-cloud-nio'
+    }
+    
     compile project(':groovy-ngs-utils')
 }
 
