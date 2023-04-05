@@ -173,7 +173,7 @@ specify it using the samjdk.reference_fasta property, eg:
 
 ```bash
 java  -Xmx12g -Dsamjdk.reference_fasta=/reference/hg38/Homo_sapiens_assembly38.fasta \
-      -jar build/libs/bazam.jar test.cram > test.fastq.gz
+      -jar build/libs/bazam.jar -bam test.cram > test.fastq.gz
 ```
 
 
